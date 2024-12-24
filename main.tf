@@ -11,8 +11,14 @@ resource "aws_key_pair" "this" {
 }
 
 resource "aws_ssm_parameter" "this" {
-  count = var.create_key_pair ? 1 : 0
-  name  = var.key_name
+  count = var.create_key_pair && var.save_to_ssm ? 1 : 0
+  name  = var.ssm_parameter_name
   type  = "SecureString"
   value = tls_private_key.this[0].private_key_pem
+}
+
+resource "local_sensitive_file" "this" {
+  count    = var.create_key_pair && var.save_to_file ? 1 : 0
+  filename = var.file_name
+  content  = tls_private_key.this[0].private_key_pem
 }
